@@ -13,15 +13,14 @@
   "dependencies": {
     "@arcana/db": "workspace:*",
     "@arcana/shared": "workspace:*",
+    "@types/node": "^25.5.0",
+    "@types/node-cron": "^3.0.11",
     "drizzle-orm": "^0.38.4",
     "ethers": "^6.13.4",
     "ioredis": "^5.4.2",
-    "node-cron": "^3.0.3"
-  },
-  "devDependencies": {
-    "@types/node": "^25.5.0",
-    "@types/node-cron": "^3.0.11",
+    "node-cron": "^3.0.3",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
-  }
+  },
+  "devDependencies": {}
 }
