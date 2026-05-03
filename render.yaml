@@ -8,14 +8,9 @@ services:
     startCommand: node dist/index.js
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: arcana-db
-          property: connectionString
+        value: postgresql://arcana_usc4_user:Ec5kKa95q0Y64LYjf1Gpy5VG4syCk7Kt@dpg-d7rl9nbeo5us73deps1g-a.oregon-postgres.render.com/arcana_usc4
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: arcana-redis
-          property: connectionString
+        value: redis://red-d7rleg3t6lks73c1m83g:6379
       - key: ARBITRUM_RPC_URL
         value: https://arb1.arbitrum.io/rpc
       - key: ARBITRUM_CHAIN_ID
@@ -36,14 +31,9 @@ services:
     startCommand: node dist/index.js
     envVars:
       - key: DATABASE_URL
-        fromDatabase:
-          name: arcana-db
-          property: connectionString
+        value: postgresql://arcana_usc4_user:Ec5kKa95q0Y64LYjf1Gpy5VG4syCk7Kt@dpg-d7rl9nbeo5us73deps1g-a.oregon-postgres.render.com/arcana_usc4
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: arcana-redis
-          property: connectionString
+        value: redis://red-d7rleg3t6lks73c1m83g:6379
       - key: ARBITRUM_RPC_URL
         value: https://arb1.arbitrum.io/rpc
       - key: ARBITRUM_CHAIN_ID
@@ -56,13 +46,3 @@ services:
         value: production
       - key: DISABLE_AUTOMATIC_NPM_INSTALL
         value: "true"
-
-databases:
-  - name: arcana-db
-    plan: free
-    region: oregon
-
-redis:
-  - name: arcana-redis
-    plan: free
-    region: oregon
