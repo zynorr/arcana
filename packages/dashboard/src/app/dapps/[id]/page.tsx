@@ -15,6 +15,10 @@ import { GasUsageChart } from "@/components/charts/GasUsageChart";
 import { TxThroughputChart } from "@/components/charts/TxThroughputChart";
 import { ErrorRateChart } from "@/components/charts/ErrorRateChart";
 import { ErrorState } from "@/components/ErrorState";
+import { Button } from "@/components/ui/Button";
+import { Badge, StatusPill } from "@/components/ui/StatusAndBadge";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Panel } from "@/components/ui/Panel";
 import { truncateAddress, EXPLORER_URLS } from "@arcana/shared";
 
 interface DApp {
@@ -176,77 +180,76 @@ export default function DAppDetailPage() {
 
   if (!dapp) {
     return (
-      <div className="card text-center py-12">
-        <p className="text-slate-400">dApp not found</p>
-      </div>
+      <Panel className="py-12 text-center">
+        <p className="text-white/50">dApp not found</p>
+      </Panel>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-white">{dapp.name}</h2>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            {dapp.contractAddresses.map((addr) => (
-              <a
-                key={addr}
-                href={`${EXPLORER_URLS[42161]}/address/${addr}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-xs text-arcana-400 hover:text-arcana-300"
+      <PageHeader
+        title={dapp.name}
+        subtitle="Per-contract performance, backfill progress, and recent indexed events."
+        actions={
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {ranges.map((r) => (
+              <Button
+                key={r}
+                variant={range === r ? "primary" : "secondary"}
+                size="sm"
+                onClick={() => setRange(r)}
               >
-                {truncateAddress(addr, 8)}
-              </a>
+                {r}
+              </Button>
             ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
-          {ranges.map((r) => (
-            <button
-              key={r}
-              onClick={() => setRange(r)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                range === r
-                  ? "bg-arcana-600 text-white"
-                  : "bg-[#1a1f2e] text-slate-400 hover:text-white"
-              }`}
+            <Button
+              data-testid="archive-dapp-button"
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleting}
             >
-              {r}
-            </button>
-          ))}
-          <button
-            data-testid="archive-dapp-button"
-            onClick={handleDelete}
-            disabled={deleting}
-            className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-300 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+              {deleting ? "Archiving..." : "Archive dApp"}
+            </Button>
+          </div>
+        }
+      />
+
+      <div className="flex flex-wrap items-center gap-2">
+        {dapp.contractAddresses.map((addr) => (
+          <a
+            key={addr}
+            href={`${EXPLORER_URLS[42161]}/address/${addr}`}
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            {deleting ? "Archiving..." : "Archive dApp"}
-          </button>
-        </div>
+            <Badge color="indigo">{truncateAddress(addr, 8)}</Badge>
+          </a>
+        ))}
+        <Badge>chain {dapp.chainId}</Badge>
       </div>
 
       {actionError && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-md border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
           {actionError}
         </div>
       )}
 
       {backfillStatus && (
-        <div
+        <Panel
           data-testid="backfill-status-panel"
-          className={`rounded-lg border px-4 py-4 text-sm ${
+          className={`px-4 py-4 text-sm ${
             backfillStatus.state === "failed"
-              ? "border-red-500/30 bg-red-500/10 text-red-200"
+              ? "border-red-500/20 bg-red-500/10 text-red-200"
               : backfillStatus.state === "completed"
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100"
-                : "border-cyan-500/30 bg-cyan-500/10 text-cyan-100"
+                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-100"
+                : "border-indigo-500/20 bg-indigo-500/10 text-indigo-100"
           }`}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.18em]">
+              <p className="font-mono text-xs font-bold uppercase tracking-[0.18em]">
                 Historical Backfill
               </p>
               <p className="mt-1">
@@ -255,9 +258,16 @@ export default function DAppDetailPage() {
                   "Backfill status unavailable"}
               </p>
             </div>
-            <span className="rounded-full border border-current/20 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em]">
-              {backfillStatus.state}
-            </span>
+            <StatusPill
+              status={
+                backfillStatus.state === "completed"
+                  ? "operational"
+                  : backfillStatus.state === "failed"
+                    ? "critical"
+                    : "syncing"
+              }
+              label={backfillStatus.state}
+            />
           </div>
 
           {backfillInProgress && (
@@ -266,8 +276,8 @@ export default function DAppDetailPage() {
                 <div
                   className={`h-full rounded-full ${
                     backfillProgress === null
-                      ? "w-1/3 animate-pulse bg-cyan-300"
-                      : "bg-cyan-300 transition-[width] duration-500"
+                      ? "w-1/3 animate-pulse bg-indigo-300"
+                      : "bg-indigo-300 transition-[width] duration-500"
                   }`}
                   style={
                     backfillProgress === null
@@ -310,7 +320,7 @@ export default function DAppDetailPage() {
               </p>
             </div>
           </div>
-        </div>
+        </Panel>
       )}
 
       {/* Metrics */}
@@ -342,10 +352,10 @@ export default function DAppDetailPage() {
       <ErrorRateChart data={metrics} />
 
       {/* Recent Events */}
-      <div className="card overflow-hidden">
+      <Panel className="overflow-hidden p-6">
         <h3 className="card-header mb-4">Recent Events</h3>
         {events.length === 0 ? (
-          <div className="py-8 text-center text-slate-500">
+          <div className="py-8 text-center text-white/35">
             {backfillInProgress
               ? "Historical backfill in progress..."
               : backfillStatus?.state === "completed" &&
@@ -357,36 +367,36 @@ export default function DAppDetailPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[#2a3040]">
-                  <th className="text-left py-2 px-3 text-slate-500 font-medium">Event</th>
-                  <th className="text-left py-2 px-3 text-slate-500 font-medium">Tx Hash</th>
-                  <th className="text-left py-2 px-3 text-slate-500 font-medium">Block</th>
-                  <th className="text-right py-2 px-3 text-slate-500 font-medium">Log #</th>
-                  <th className="text-right py-2 px-3 text-slate-500 font-medium">Time</th>
+                <tr className="border-b border-white/[0.08]">
+                  <th className="px-3 py-2 text-left font-mono text-[11px] font-medium uppercase tracking-widest text-white/35">Event</th>
+                  <th className="px-3 py-2 text-left font-mono text-[11px] font-medium uppercase tracking-widest text-white/35">Tx Hash</th>
+                  <th className="px-3 py-2 text-left font-mono text-[11px] font-medium uppercase tracking-widest text-white/35">Block</th>
+                  <th className="px-3 py-2 text-right font-mono text-[11px] font-medium uppercase tracking-widest text-white/35">Log #</th>
+                  <th className="px-3 py-2 text-right font-mono text-[11px] font-medium uppercase tracking-widest text-white/35">Time</th>
                 </tr>
               </thead>
               <tbody>
                 {events.map((ev) => (
                   <tr
                     key={`${ev.txHash}-${ev.logIndex}`}
-                    className="border-b border-[#2a3040]/50 hover:bg-[#1a1f2e]/50"
+                    className="border-b border-white/[0.05] transition-colors hover:bg-white/[0.03]"
                   >
                     <td className="py-2.5 px-3">
-                      <span className="badge badge-stylus">{ev.eventName}</span>
+                      <Badge color="indigo">{ev.eventName}</Badge>
                     </td>
                     <td className="py-2.5 px-3">
                       <a
                         href={`${EXPLORER_URLS[42161]}/tx/${ev.txHash}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-arcana-400 hover:text-arcana-300 font-mono"
+                        className="font-mono text-white/80 hover:text-white"
                       >
                         {truncateAddress(ev.txHash, 6)}
                       </a>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-300 font-mono">{ev.blockNumber}</td>
-                    <td className="py-2.5 px-3 text-right text-slate-300">{ev.logIndex}</td>
-                    <td className="py-2.5 px-3 text-right text-xs text-slate-500">
+                    <td className="px-3 py-2.5 font-mono text-white/70">{ev.blockNumber}</td>
+                    <td className="px-3 py-2.5 text-right text-white/70">{ev.logIndex}</td>
+                    <td className="px-3 py-2.5 text-right text-xs text-white/35">
                       {new Date(ev.timestamp).toLocaleTimeString()}
                     </td>
                   </tr>
@@ -395,7 +405,7 @@ export default function DAppDetailPage() {
             </table>
           </div>
         )}
-      </div>
+      </Panel>
     </div>
   );
 }

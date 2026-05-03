@@ -5,13 +5,38 @@ import { dapps } from "../schema";
 
 const MONITORED_DAPPS = [
   {
-    name: "Infinite Rainbows",
-    contractAddresses: ["0x78072889ee4d7fe1a100c25296aabbea32e92bea"],
+    name: "StylusPencil",
+    contractAddresses: ["0xb9ff17bc84720734fd8b0c88b2905008a71091d0"],
     chainId: 42161,
   },
   {
-    name: "StylusPencil",
-    contractAddresses: ["0xb9ff17bc84720734fd8b0c88b2905008a71091d0"],
+    name: "Stylus Hello World",
+    contractAddresses: ["0x6dc35eb6f074dcc2485394d4cc5c7429f70c7c5f"],
+    chainId: 42161,
+  },
+  {
+    name: "Keystone Lending",
+    contractAddresses: ["0x4dff9348275ac3c24e2d3abf54af61d3ebee1585"],
+    chainId: 42161,
+  },
+  {
+    name: "Keystone AMM",
+    contractAddresses: ["0x9615cc2f65d8bbe4cdc80343db75a6ec32da93cd"],
+    chainId: 42161,
+  },
+  {
+    name: "Keystone Vault",
+    contractAddresses: ["0xdaf8f1a5f8025210f07665d4ccf2d2c0622a41fa"],
+    chainId: 42161,
+  },
+  {
+    name: "9Lives Prediction Market",
+    contractAddresses: ["0x17769631bf02c6d1455f2cd46282242decd0cbb0f"],
+    chainId: 42161,
+  },
+  {
+    name: "Infinite Rainbows",
+    contractAddresses: ["0x78072889ee4d7fe1a100c25296aabbea32e92bea"],
     chainId: 42161,
   },
 ] as const;

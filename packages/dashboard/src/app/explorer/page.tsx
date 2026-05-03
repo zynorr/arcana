@@ -251,25 +251,25 @@ function ExplorerPageContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-white">Explorer</h2>
-        <p className="text-sm text-slate-400 mt-1">
+        <h2 className="text-3xl font-bold text-white mb-2">Explorer</h2>
+        <p className="text-sm text-white/40">
           Browse indexed blocks, transactions, and contract events
         </p>
       </div>
 
       {searchQuery && (
-        <div className="card border-arcana-600/40 bg-arcana-950/20">
-          <div className="flex items-start justify-between gap-4">
+        <div className="card border-white/[0.06] bg-white/[0.02]">
+          <div className="flex items-start justify-between gap-6">
             <div>
-              <div className="text-xs font-medium tracking-[0.18em] uppercase text-arcana-400">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-indigo">
                 Search
               </div>
               <div className="mt-2 font-mono text-sm text-white break-all">
                 {searchQuery}
               </div>
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 text-sm text-white/40">
                 {searchLoading
                   ? "Searching indexed data..."
                   : searchError
@@ -285,7 +285,7 @@ function ExplorerPageContent() {
             </div>
             <button
               onClick={clearSearch}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1a1f2e] text-slate-300 hover:text-white transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white/80 transition-colors"
             >
               Clear Search
             </button>
@@ -293,33 +293,33 @@ function ExplorerPageContent() {
         </div>
       )}
 
-      <div className="flex items-center gap-4 border-b border-[#2a3040] pb-3 flex-wrap">
+      <div className="flex items-center gap-6 border-b border-white/[0.06] pb-3 flex-wrap">
         <button
           onClick={() => switchTab("transactions")}
-          className={`text-sm font-medium pb-2 border-b-2 transition-colors ${
+          className={`text-sm font-medium pb-3 border-b-2 transition-colors ${
             tab === "transactions"
-              ? "text-white border-arcana-500"
-              : "text-slate-400 border-transparent hover:text-white"
+              ? "text-white border-accent-indigo"
+              : "text-white/40 border-transparent hover:text-white"
           }`}
         >
           Transactions
         </button>
         <button
           onClick={() => switchTab("blocks")}
-          className={`text-sm font-medium pb-2 border-b-2 transition-colors ${
+          className={`text-sm font-medium pb-3 border-b-2 transition-colors ${
             tab === "blocks"
-              ? "text-white border-arcana-500"
-              : "text-slate-400 border-transparent hover:text-white"
+              ? "text-white border-accent-indigo"
+              : "text-white/40 border-transparent hover:text-white"
           }`}
         >
           Blocks
         </button>
         <button
           onClick={() => switchTab("events")}
-          className={`text-sm font-medium pb-2 border-b-2 transition-colors ${
+          className={`text-sm font-medium pb-3 border-b-2 transition-colors ${
             tab === "events"
-              ? "text-white border-arcana-500"
-              : "text-slate-400 border-transparent hover:text-white"
+              ? "text-white border-accent-indigo"
+              : "text-white/40 border-transparent hover:text-white"
           }`}
         >
           Events
@@ -332,10 +332,10 @@ function ExplorerPageContent() {
                 setEventFilter("all");
                 setEventPage(0);
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-medium ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
                 eventFilter === "all"
-                  ? "bg-arcana-600 text-white"
-                  : "bg-[#1a1f2e] text-slate-400"
+                  ? "bg-accent-indigo text-white"
+                  : "bg-white/[0.04] text-white/40 hover:text-white/70"
               }`}
             >
               All
@@ -347,10 +347,10 @@ function ExplorerPageContent() {
                   setEventFilter(eventName.eventName);
                   setEventPage(0);
                 }}
-                className={`px-3 py-1 rounded-lg text-xs font-medium ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
                   eventFilter === eventName.eventName
-                    ? "bg-arcana-600 text-white"
-                    : "bg-[#1a1f2e] text-slate-400"
+                    ? "bg-accent-indigo text-white"
+                    : "bg-white/[0.04] text-white/40 hover:text-white/70"
                 }`}
               >
                 {eventName.eventName} ({eventName.count})
@@ -365,10 +365,10 @@ function ExplorerPageContent() {
               <button
                 key={nextFilter}
                 onClick={() => setFilter(nextFilter)}
-                className={`px-3 py-1 rounded-lg text-xs font-medium ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${
                   filter === nextFilter
-                    ? "bg-arcana-600 text-white"
-                    : "bg-[#1a1f2e] text-slate-400"
+                    ? "bg-accent-indigo text-white"
+                    : "bg-white/[0.04] text-white/40 hover:text-white/70"
                 }`}
               >
                 {nextFilter === "all"

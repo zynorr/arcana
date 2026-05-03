@@ -1,6 +1,8 @@
 "use client";
 
-import { clsx } from "clsx";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
+import { cn } from "@/lib/cn";
+import { Panel } from "@/components/ui/Panel";
 
 interface MetricCardProps {
   title: string;
@@ -21,34 +23,48 @@ export function MetricCard({
   icon,
   highlight,
 }: MetricCardProps) {
+  const trendTone =
+    trend === "up"
+      ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-400"
+      : trend === "down"
+        ? "border-red-400/20 bg-red-400/10 text-red-400"
+        : "border-white/10 bg-white/5 text-white/40";
+
   return (
-    <div
-      className={clsx(
-        "card transition-all hover:border-[#00d1ff]/30",
-        highlight && "border-[#00d1ff]/35 bg-[#142126]",
+    <Panel
+      className={cn(
+        "flex flex-col p-5",
+        highlight && "border-indigo-500/20 bg-indigo-500/10",
       )}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="card-header">{title}</span>
-        {icon && <span className="text-[#859399]">{icon}</span>}
+        <span className="text-[13px] font-medium text-white/50">{title}</span>
+        {icon && <span className="text-white/35">{icon}</span>}
       </div>
-      <div className="card-value">{value}</div>
+      <div className="text-3xl font-semibold tracking-tight text-white">
+        {value}
+      </div>
       <div className="flex items-center gap-2 mt-2">
         {trend && trendValue && (
           <span
-            className={clsx(
-              "text-xs font-bold",
-              trend === "up" && "text-[#00d1ff]",
-              trend === "down" && "text-[#ffb4ab]",
-              trend === "neutral" && "text-[#859399]",
+            className={cn(
+              "inline-flex items-center gap-1 rounded border px-1.5 py-0.5 font-mono text-[11px] font-medium",
+              trendTone,
             )}
           >
+            {trend === "up" ? (
+              <TrendingUp size={12} strokeWidth={2.5} />
+            ) : trend === "down" ? (
+              <TrendingDown size={12} strokeWidth={2.5} />
+            ) : (
+              <Minus size={12} strokeWidth={2.5} />
+            )}
             {trend === "up" ? "+" : trend === "down" ? "-" : ""}
-            {trendValue}
+            {trendValue.replace(/^[+-]/, "")}
           </span>
         )}
-        {subtitle && <span className="text-xs text-[#859399]">{subtitle}</span>}
+        {subtitle && <span className="text-xs text-white/30">{subtitle}</span>}
       </div>
-    </div>
+    </Panel>
   );
 }

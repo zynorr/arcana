@@ -1,14 +1,23 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, Search } from "lucide-react";
 import {
-  fetchDapps,
-  fetchDappBackfillStatus,
   createDapp,
+  fetchDappBackfillStatus,
+  fetchDapps,
   type BackfillStatus,
 } from "@/lib/api";
 import { truncateAddress } from "@arcana/shared";
 import { ErrorState } from "@/components/ErrorState";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/Button";
+import { DataTable, TableCell, TableHead, TableRow } from "@/components/ui/DataTable";
+import { Input, Textarea } from "@/components/ui/Input";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Panel } from "@/components/ui/Panel";
+import { Badge, StatusPill } from "@/components/ui/StatusAndBadge";
 
 interface DApp {
   id: string;
@@ -19,6 +28,7 @@ interface DApp {
 }
 
 export default function DAppsPage() {
+  const router = useRouter();
   const [dapps, setDapps] = useState<DApp[]>([]);
   const [backfillStatuses, setBackfillStatuses] = useState<
     Record<string, BackfillStatus>
@@ -28,6 +38,7 @@ export default function DAppsPage() {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [addresses, setAddresses] = useState("");
+  const [search, setSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
@@ -126,155 +137,257 @@ export default function DAppsPage() {
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white">Monitored dApps</h2>
-          <p className="text-sm text-slate-400 mt-1">
-            Register Stylus dApp contracts to track their performance
-          </p>
+  const filteredDapps = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return dapps;
+
+    return dapps.filter((dapp) => {
+      const haystack = [dapp.name, ...dapp.contractAddresses]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [dapps, search]);
+
+  if (error) {
+    return <ErrorState message={error} onRetry={loadDapps} />;
+  }
+
+return (
+    <div className="space-y-8">
+      <PageHeader
+        title="dApp Registry"
+        subtitle="Track monitored Stylus contracts, watch backfill progress, and open each contract's performance view."
+        actions={
+          <Button
+            data-testid="toggle-dapp-form"
+            onClick={() => setShowForm((current) => !current)}
+            className="gap-2"
+          >
+            <Plus size={16} />
+            {showForm ? "Close Form" : "Add dApp"}
+          </Button>
+        }
+      />
+
+      {showForm ? (
+        <Panel className="p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.2fr]">
+              <div>
+                <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-white/40">
+                  dApp Name
+                </label>
+                <Input
+                  data-testid="dapp-name-input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="My Stylus dApp"
+                  disabled={submitting}
+                />
+              </div>
+              <div>
+                <label className="mb-3 block text-xs font-semibold uppercase tracking-wider text-white/40">
+                  Contract Addresses
+                </label>
+                <Textarea
+                  data-testid="dapp-addresses-input"
+                  value={addresses}
+                  onChange={(e) => setAddresses(e.target.value)}
+                  placeholder="0x1234..., 0x5678... or one per line"
+                  disabled={submitting}
+                  rows={4}
+                />
+                <p className="mt-3 text-xs text-white/30">
+                  Duplicate and invalid addresses are rejected automatically.
+                </p>
+              </div>
+            </div>
+
+            {formError ? (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                {formError}
+              </div>
+            ) : null}
+
+            <div className="flex items-center gap-4">
+              <Button
+                data-testid="submit-dapp-form"
+                type="submit"
+                disabled={submitting}
+              >
+                {submitting ? "Registering..." : "Register dApp"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setShowForm(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Panel>
+      ) : null}
+
+      {formSuccess ? (
+        <Panel className="border-emerald-500/20 bg-emerald-500/10 p-5 text-sm text-emerald-300">
+          {formSuccess}
+        </Panel>
+      ) : null}
+
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="relative max-w-md flex-1">
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25"
+            size={16}
+          />
+          <Input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search registry..."
+            className="pl-11"
+          />
         </div>
-        <button
-          data-testid="toggle-dapp-form"
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-arcana-600 text-white rounded-lg text-sm font-medium hover:bg-arcana-700 transition-colors"
-        >
-          + Add dApp
-        </button>
+        <div className="text-xs font-mono font-semibold uppercase tracking-[0.15em] text-white/30">
+          {filteredDapps.length} visible
+        </div>
       </div>
 
-      {/* Add dApp form */}
-      {showForm && (
-        <form onSubmit={handleSubmit} className="card space-y-4">
-          <div>
-            <label className="block text-sm text-slate-400 mb-1">
-              dApp Name
-            </label>
-            <input
-              data-testid="dapp-name-input"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="My Stylus dApp"
-              disabled={submitting}
-              className="w-full bg-[#0a0e1a] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-arcana-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-slate-400 mb-1">
-              Contract Addresses (comma or newline-separated)
-            </label>
-            <textarea
-              data-testid="dapp-addresses-input"
-              value={addresses}
-              onChange={(e) => setAddresses(e.target.value)}
-              placeholder="0x1234..., 0x5678... or one per line"
-              disabled={submitting}
-              rows={4}
-              className="w-full bg-[#0a0e1a] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-arcana-500"
-            />
-            <p className="mt-1 text-xs text-slate-500">
-              Duplicate and invalid addresses are rejected automatically.
-            </p>
-          </div>
-          {formError && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-              {formError}
-            </div>
-          )}
-          <button
-            data-testid="submit-dapp-form"
-            type="submit"
-            disabled={submitting}
-            className="px-4 py-2 bg-arcana-600 text-white rounded-lg text-sm font-medium hover:bg-arcana-700 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {submitting ? "Registering..." : "Register dApp"}
-          </button>
-        </form>
-      )}
-
-      {formSuccess && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-          {formSuccess}
-        </div>
-      )}
-
-      {/* dApp list */}
-      {error ? (
-        <ErrorState message={error} onRetry={loadDapps} />
-      ) : loading ? (
+      {loading ? (
         <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="card animate-pulse">
-              <div className="h-6 bg-slate-800 rounded w-48 mb-2"></div>
-              <div className="h-4 bg-slate-800 rounded w-96"></div>
-            </div>
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Panel key={index} className="animate-pulse p-6">
+              <div className="mb-3 h-5 w-48 rounded bg-white/10" />
+              <div className="h-4 w-80 rounded bg-white/10" />
+            </Panel>
           ))}
         </div>
-      ) : dapps.length === 0 ? (
-        <div className="card text-center py-12">
-          <p className="text-slate-400 text-lg mb-2">No dApps registered yet</p>
-          <p className="text-slate-500 text-sm">
-            Click &quot;+ Add dApp&quot; to start monitoring a Stylus contract
-          </p>
-        </div>
+      ) : filteredDapps.length === 0 ? (
+        <EmptyState
+          title={dapps.length === 0 ? "No dApps registered yet" : "No matching dApps"}
+          description={
+            dapps.length === 0
+              ? 'Use "Add dApp" to start monitoring a Stylus contract.'
+              : "Try a different search term or clear the current filter."
+          }
+        />
       ) : (
-        <div className="space-y-4">
-          {dapps.map((dapp) => {
-            const status = backfillStatuses[dapp.id];
+        <DataTable>
+          <TableHead>
+            <tr>
+              <TableCell isHeader>Project Name</TableCell>
+              <TableCell isHeader>Contracts</TableCell>
+              <TableCell isHeader>Status</TableCell>
+              <TableCell isHeader className="text-right">
+                Indexed Txs
+              </TableCell>
+              <TableCell isHeader className="text-right">
+                Indexed Events
+              </TableCell>
+              <TableCell isHeader>Progress</TableCell>
+            </tr>
+          </TableHead>
+          <tbody>
+            {filteredDapps.map((dapp) => {
+              const status = backfillStatuses[dapp.id];
+              const runtimeStatus = mapBackfillStatus(status);
+              const progressLabel = getBackfillProgressLabel(status);
 
-            return (
-              <a
-                key={dapp.id}
-                href={`/dapps/${dapp.id}`}
-                className="card block hover:border-arcana-700/50 transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">
-                      {dapp.name}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      {dapp.contractAddresses.map((addr) => (
-                        <span
-                          key={addr}
-                          className="font-mono text-xs text-arcana-400 bg-arcana-500/10 px-2 py-0.5 rounded"
-                        >
-                          {truncateAddress(addr, 8)}
+              return (
+                <TableRow
+                  key={dapp.id}
+                  onClick={() => router.push(`/dapps/${dapp.id}`)}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] font-mono text-[12px] font-semibold tracking-wider text-white/50 shadow-inner transition-colors group-hover:border-white/[0.1] group-hover:bg-white/[0.06]">
+                        {dapp.name.substring(0, 2).toUpperCase()}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[14px] font-semibold text-white">
+                          {dapp.name}
                         </span>
-                      ))}
-                    </div>
-                    {status && (
-                      <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${
-                            status.state === "completed"
-                              ? "bg-emerald-500/10 text-emerald-300"
-                              : status.state === "failed"
-                                ? "bg-red-500/10 text-red-300"
-                                : "bg-cyan-500/10 text-cyan-300"
-                          }`}
-                        >
-                          {status.state}
-                        </span>
-                        <span className="text-xs text-slate-500">
-                          {status.totalTransactions
-                            ? `${status.processedTransactions.toLocaleString()} / ${status.totalTransactions.toLocaleString()} txs`
-                            : status.message}
+                        <span className="mt-0.5 font-mono text-[11px] text-white/35">
+                          chain {dapp.chainId}
                         </span>
                       </div>
-                    )}
-                  </div>
-                  <span className="text-xs text-slate-500">
-                    Added {new Date(dapp.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-              </a>
-            );
-          })}
-        </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-2">
+                      {dapp.contractAddresses.slice(0, 2).map((address) => (
+                        <Badge key={address} color="indigo">
+                          {truncateAddress(address, 8)}
+                        </Badge>
+                      ))}
+                      {dapp.contractAddresses.length > 2 ? (
+                        <Badge>
+                          +{dapp.contractAddresses.length - 2} more
+                        </Badge>
+                      ) : null}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <StatusPill
+                      status={runtimeStatus}
+                      label={status?.state ?? "ready"}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-white/85">
+                    {(status?.indexedTransactions ?? 0).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-white/85">
+                    {(status?.indexedEvents ?? 0).toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <div className="space-y-1">
+                      <div className="text-[13px] text-white/80">
+                        {progressLabel}
+                      </div>
+                      {status?.message ? (
+                        <div className="text-xs text-white/35">{status.message}</div>
+                      ) : null}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </tbody>
+        </DataTable>
       )}
     </div>
   );
+}
+
+function mapBackfillStatus(
+  status?: BackfillStatus,
+): "operational" | "warning" | "critical" | "syncing" | "offline" {
+  if (!status) return "offline";
+  if (status.state === "completed") return "operational";
+  if (status.state === "failed") return "critical";
+  if (status.state === "queued" || status.state === "scanning" || status.state === "syncing") {
+    return "syncing";
+  }
+  return "warning";
+}
+
+function getBackfillProgressLabel(status?: BackfillStatus) {
+  if (!status) return "Awaiting status";
+
+  if (status.totalTransactions && status.totalTransactions > 0) {
+    return `${status.processedTransactions.toLocaleString()} / ${status.totalTransactions.toLocaleString()} processed`;
+  }
+
+  if (status.state === "completed") {
+    return "Backfill completed";
+  }
+
+  if (status.state === "failed") {
+    return "Backfill failed";
+  }
+
+  return "Backfill in progress";
 }

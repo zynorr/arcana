@@ -10,6 +10,7 @@ import {
   fetchDapps,
 } from "@/lib/api";
 import { ErrorState } from "@/components/ErrorState";
+import { Input } from "@/components/ui/Input";
 
 interface DApp {
   id: string;
@@ -193,28 +194,28 @@ export default function AlertsPage() {
   const selectedMetric = METRICS.find((item) => item.value === metric) ?? METRICS[0];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Alerts</h2>
-          <p className="text-sm text-slate-400 mt-1">
+          <h2 className="text-3xl font-bold text-white mb-2">Alerts</h2>
+          <p className="text-sm text-white/40">
             Configure thresholds to detect performance regressions and anomalies
           </p>
         </div>
         <button
           data-testid="toggle-alert-form"
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-arcana-600 text-white rounded-lg text-sm font-medium hover:bg-arcana-700 transition-colors"
+          className="px-5 py-2.5 bg-accent-indigo text-white rounded-xl text-sm font-semibold hover:bg-accent-indigo/90 transition-colors shadow-glow-sm"
         >
           {showForm ? "Close Form" : "+ Create Rule"}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="card space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <form onSubmit={handleCreate} className="card space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
             <div>
-              <label className="block text-sm text-slate-400 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
                 Scope
               </label>
               <select
@@ -222,7 +223,7 @@ export default function AlertsPage() {
                 value={selectedDappId}
                 onChange={(e) => setSelectedDappId(e.target.value)}
                 disabled={submitting}
-                className="w-full bg-[#0a0e1a] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full"
               >
                 <option value="">Network-wide</option>
                 {dapps.map((dapp) => (
@@ -234,7 +235,7 @@ export default function AlertsPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-slate-400 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
                 Metric
               </label>
               <select
@@ -242,7 +243,7 @@ export default function AlertsPage() {
                 value={metric}
                 onChange={(e) => setMetric(e.target.value)}
                 disabled={submitting}
-                className="w-full bg-[#0a0e1a] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full"
               >
                 {METRICS.map((item) => (
                   <option key={item.value} value={item.value}>
@@ -253,7 +254,7 @@ export default function AlertsPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-slate-400 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
                 Condition
               </label>
               <select
@@ -261,7 +262,7 @@ export default function AlertsPage() {
                 value={condition}
                 onChange={(e) => setCondition(e.target.value)}
                 disabled={submitting}
-                className="w-full bg-[#0a0e1a] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full"
               >
                 <option value="above">Above</option>
                 <option value="below">Below</option>
@@ -269,25 +270,24 @@ export default function AlertsPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-slate-400 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
                 Threshold
               </label>
-              <input
+              <Input
                 data-testid="alert-threshold-input"
                 type="number"
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
                 placeholder={selectedMetric.placeholder}
                 disabled={submitting}
-                className="w-full bg-[#0a0e1a] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600"
               />
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-white/30">
                 {selectedMetric.hint}
               </p>
             </div>
 
             <div>
-              <label className="block text-sm text-slate-400 mb-1">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">
                 Window
               </label>
               <select
@@ -295,7 +295,7 @@ export default function AlertsPage() {
                 value={window}
                 onChange={(e) => setWindow(e.target.value)}
                 disabled={submitting}
-                className="w-full bg-[#0a0e1a] border border-[#2a3040] rounded-lg px-3 py-2 text-sm text-white"
+                className="w-full"
               >
                 <option value="5m">5 minutes</option>
                 <option value="1h">1 hour</option>
@@ -338,7 +338,7 @@ export default function AlertsPage() {
       ) : (
         <>
           <div>
-            <h3 className="text-lg font-semibold text-white mb-3">Active Rules</h3>
+            <h3 className="text-lg font-bold text-white mb-5">Active Rules</h3>
             {loading ? (
               <div className="animate-pulse space-y-3">
                 {Array.from({ length: 3 }).map((_, i) => (
@@ -355,48 +355,48 @@ export default function AlertsPage() {
                   <div
                     key={rule.id}
                     data-testid={`alert-rule-${rule.id}`}
-                    className="card flex items-center justify-between gap-4 flex-wrap"
+                    className="card flex items-center justify-between gap-6 flex-wrap"
                   >
-                    <div className="flex items-center gap-4 flex-wrap">
+                    <div className="flex items-center gap-5 flex-wrap">
                       <span
-                        className={`w-2 h-2 rounded-full ${
-                          rule.enabled ? "bg-emerald-500" : "bg-slate-600"
+                        className={`w-2.5 h-2.5 rounded-full ${
+                          rule.enabled ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-white/20"
                         }`}
                       ></span>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-white font-medium">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className="text-white font-semibold">
                             {getMetricLabel(rule.metric)}
                           </span>
-                          <span className="text-slate-400">
+                          <span className="text-white/40">
                             {rule.condition}
                           </span>
-                          <span className="text-arcana-400 font-mono">
+                          <span className="text-accent-indigo font-mono font-semibold">
                             {formatAlertNumber(rule.metric, rule.threshold)}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap text-xs">
-                          <span className="badge bg-slate-700/50 text-slate-300">
+                          <span className="badge bg-white/[0.04] text-white/50">
                             {rule.window}
                           </span>
-                          <span className="badge bg-[#1a1f2e] text-slate-300">
+                          <span className="badge bg-white/[0.04] text-white/50">
                             {rule.dappId
                               ? dappNameById.get(rule.dappId) ?? "Selected dApp"
                               : "Network-wide"}
                           </span>
-                          <span className="text-slate-500">
+                          <span className="text-white/30">
                             {rule.enabled ? "Enabled" : "Paused"}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       <button
                         data-testid={`alert-toggle-${rule.id}`}
                         onClick={() => handleToggle(rule)}
                         disabled={pendingRuleId === rule.id}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[#1a1f2e] text-slate-300 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/[0.04] text-white/50 hover:bg-white/[0.08] hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         {pendingRuleId === rule.id
                           ? "Saving..."
@@ -408,7 +408,7 @@ export default function AlertsPage() {
                         data-testid={`alert-delete-${rule.id}`}
                         onClick={() => handleDelete(rule.id)}
                         disabled={pendingRuleId === rule.id}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-300 hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="px-4 py-2 rounded-xl text-xs font-semibold bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Delete
                       </button>
@@ -420,7 +420,7 @@ export default function AlertsPage() {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold text-white mb-3">
+            <h3 className="text-lg font-bold text-white mb-5">
               Recent Alerts
             </h3>
             {loading ? (
@@ -442,41 +442,41 @@ export default function AlertsPage() {
                   return (
                     <div
                       key={event.id}
-                      className="card flex items-center justify-between gap-4 py-3 flex-wrap"
+                      className="card flex items-center justify-between gap-6 py-4 flex-wrap"
                     >
-                      <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-4 flex-wrap">
                         <span
-                          className={`w-2 h-2 rounded-full ${
-                            event.resolvedAt ? "bg-emerald-500" : "bg-red-500"
+                          className={`w-2.5 h-2.5 rounded-full ${
+                            event.resolvedAt ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
                           }`}
                         ></span>
-                        <div className="space-y-1">
-                          <div className="text-sm text-white">
+                        <div className="space-y-2">
+                          <div className="text-sm font-semibold text-white/80">
                             {rule
                               ? `${getMetricLabel(rule.metric)} ${rule.condition} ${formatAlertNumber(rule.metric, rule.threshold)}`
                               : `Rule ${event.ruleId.slice(0, 8)}...`}
                           </div>
-                          <div className="text-sm text-slate-400">
+                          <div className="text-sm text-white/40">
                             Value:{" "}
-                            <span className="font-mono text-red-300">
+                            <span className="font-mono text-red-400">
                               {formatAlertNumber(metricKey, event.metricValue)}
                             </span>
                             {" / "}
                             Threshold:{" "}
-                            <span className="font-mono">
+                            <span className="font-mono text-white/60">
                               {formatAlertNumber(metricKey, event.thresholdValue)}
                             </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         {event.resolvedAt ? (
                           <span className="badge badge-success">Resolved</span>
                         ) : (
                           <span className="badge badge-error">Active</span>
                         )}
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-white/30">
                           {new Date(event.triggeredAt).toLocaleString()}
                         </span>
                       </div>
