@@ -1,0 +1,62 @@
+services:
+  - type: web
+    name: arcana-api
+    env: node
+    region: oregon
+    buildCommand: pnpm install && pnpm build
+    startCommand: node packages/api/dist/index.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: arcana-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: arcana-redis
+          property: connectionString
+      - key: ARBITRUM_RPC_URL
+        value: https://arb1.arbitrum.io/rpc
+      - key: ARBITRUM_CHAIN_ID
+        value: "42161"
+      - key: API_PORT
+        value: "10000"
+      - key: NODE_ENV
+        value: production
+
+  - type: web
+    name: arcana-collector
+    env: node
+    region: oregon
+    buildCommand: pnpm install && pnpm build
+    startCommand: node packages/collector/dist/index.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: arcana-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: arcana-redis
+          property: connectionString
+      - key: ARBITRUM_RPC_URL
+        value: https://arb1.arbitrum.io/rpc
+      - key: ARBITRUM_CHAIN_ID
+        value: "42161"
+      - key: COLLECTOR_POLL_INTERVAL_MS
+        value: "1000"
+      - key: COLLECTOR_BATCH_SIZE
+        value: "100"
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: arcana-db
+    plan: free
+    region: oregon
+
+redis:
+  - name: arcana-redis
+    plan: free
+    region: oregon
